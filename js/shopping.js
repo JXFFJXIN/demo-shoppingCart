@@ -6,6 +6,137 @@
 		4、第一次取到的结果为null，所以做一个容错处理
 		5
  */
+/* 
+	步骤：
+	0.全局定义selectData={}；-商品信息缓存
+
+	1.定义addEvent(){
+		定义str为表格行tr
+		循环调用action方法
+		定义action(){
+			**dom操作**
+			定义tds为td
+			定义img为tds[0].children[0]-商品图片
+			定义imgSrc为img.getAttribute('src')-图片地址
+			定义name为tds[1].children[0].innerHTML-名字
+			定义colors为tds[1].children[1].children-颜色
+			定义price为tds[2]-价格
+			定义spans为tds[3].querySelectorALl('span')-+/-按钮
+			定义strong为tds[3].querySelector('strong')-数量
+			定义joinBtn为tds[4].children[0]
+			定义slectNum为0需要修改的数据缓存
+
+			**选项卡切换颜色和图片**
+			定义last=null-上次选中的
+			定义colorValue=''；-存储颜色
+			定义colorId='';-存储商品id
+			循环colors数组{
+				给colors[i]添加index属性为i
+				给colors[i]添加click事件{
+					1/
+					清空last.className
+					注意last为null时候无法清空
+					2/
+					this.className为'active'
+					3/
+					colorValue = this.className?this.innerHTML:'';
+					colorId = this.className?this.dataset.id:'';
+					imaSrc = this.className?`images/img_0${n+1}-${this.index + 1}.png`:`images/img_0${n+1}-1.png`
+					4/
+					last指向this
+				}
+			}
+
+			**+/-按钮**
+			给spans[0]添加click事件{
+				slectNum--；
+				如果slectNum<0时slectNum为0
+
+				strong添加HTML为slectNum
+			}
+			给spans[1]添加click事件{
+				slectNum++；
+				strong添加HTML为slectNum
+			}
+
+			**加入购物车按钮**
+			给joinBtn添加click事件{
+				判断！colorValue{
+					//...
+					return;--阻止代码继续往下走
+				}
+				判断！slectNum{
+					//...
+					retur;
+				}
+
+				**封装商品缓存**
+				selectData[colorId] = {
+					"id": colorId,	//用于删除的时候取到对应的数据
+					"name": name,
+					"color": colorValue,
+					"price": parseFloat(price.innerHTML),
+					"num": slectNum,
+					"img": imgSrc,
+					'time': new Date().getTime(),	//为了排序
+				};
+
+				**本地存储**
+				localStorage.setItem('自定义词条名'，JSON.stringify(selectData))
+
+				**还原属性**
+				img.src = 'images/img_0' + (n + 1) + '-1.png';
+				last.className = '';
+				strong.innerHTML = slectNum = 0;
+
+				**渲染**
+				createSlectDom();
+			}
+		}
+	}
+	2. 定义createSelectDom{
+		定义tbody为类名.selected tbody的dom
+		定义str为'';
+		定义goods为Object.value(selectData);
+		//ES7里的，用来取对象里所有的value
+		进行排序
+		goods.sort(function(g1,g2){
+			return g2.time-g1.time;
+		})
+		tbody清空innerHTML
+		循环goods{
+			拼接字符串
+		}
+		tbody.innerHTML赋值str
+
+		运行del()
+	}
+	3. 定义init{
+		取缓存
+		selectData = JSON.parse(localStorage.getItem('shoppingCart')) || {};
+		运行createSelectDom
+		运行addEvent
+
+	}
+	4. 运行init
+	5. 定义del{
+		定义btns获取按钮
+		定义tbody获取tbody
+
+		循环btns{
+			给btns[i]添加click事件{
+				删除delete selectData[this.dataset.id];
+				localStorage.setItem('shoppingCart',JSON.stringify(selectData));
+
+				tbody.removeChild(this.parentNode.parentNode);
+			}
+		}
+	}
+	5. window.addEventListener('storage',init)
+	// 这个事件当localstorage发生改变的时候就会触发。
+	// 回调函数是在同域新页面运行
+
+*/
 var selectData={};
 function init() {
 	// var selectData={};
@@ -15,7 +146,6 @@ function init() {
 	addEvent();
 }
 init();
-
 
 
 //添加商品操作事件
